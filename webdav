@@ -1,0 +1,26 @@
+server {
+  listen 80;
+  server_name images.example.com;
+  # описываем upload-секцию:
+  location /images {
+    # максимальный размер файла, который можно залить.
+    client_max_body_size 10m;
+    # каталог, куда заливать
+    root /files;
+    # chmod для залитых файлов - здесь 777, чтобы user тоже мог удалять файлы
+    dav_access user:rw group:rw all:rw;
+    # разрешаем методы webdav-a. Для примера я перечислил все, для аплоада файлов хватит PUT и MKCOL
+    dav_methods PUT DELETE MKCOL COPY MOVE;
+    # nginx будет создавать весь путь при аплоаде файлов (можно будет не создавать предварительно вложенные каталоги)
+    create_full_put_path on;
+    # включаем autoindex в каталоге upload (чтобы на самом images.example.com листинг не включать).
+    autoindex on;
+    autoindex_exact_size off;
+    autoindex_localtime on;
+    charset utf-8;
+  }
+  # теперь описываем раздачу файлов по http из "корня" сайта:
+  location / {
+    root /files;
+  }
+}
